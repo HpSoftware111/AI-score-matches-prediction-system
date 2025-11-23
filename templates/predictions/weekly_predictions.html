@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3><i class="fas fa-calendar-week"></i> Weekly Predictions</h3>
+                <small>Week of {{ week_start|date:"M d" }} - {{ week_end|date:"M d, Y" }}</small>
+            </div>
+            <div class="card-body">
+                <!-- Filters -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="fas fa-filter"></i> Filters</h5>
+                                <form method="get" action="{% url 'predictions:weekly_predictions' %}" class="row g-3">
+                                    <div class="col-md-3">
+                                        <label for="week" class="form-label">Week</label>
+                                        <select class="form-select" id="week" name="week">
+                                            <option value="">All Weeks</option>
+                                            {% for week in available_weeks %}
+                                                <option value="{{ week }}" {% if filter_week == week %}selected{% endif %}>{{ week }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label for="country" class="form-label">Country</label>
+                                        <select class="form-select" id="country" name="country">
+                                            <option value="">All Countries</option>
+                                            {% for country in distinct_countries %}
+                                                <option value="{{ country }}" {% if filter_country == country %}selected{% endif %}>{{ country }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label for="game_title" class="form-label">Game/League</label>
+                                        <select class="form-select" id="game_title" name="game_title">
+                                            <option value="">All Games</option>
+                                            {% for title in distinct_game_titles %}
+                                                <option value="{{ title }}" {% if filter_game_title == title %}selected{% endif %}>{{ title }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label">&nbsp;</label>
+                                        <div class="d-grid gap-2">
+                                            <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Apply Filters</button>
+                                            <a href="{% url 'predictions:weekly_predictions' %}" class="btn btn-secondary btn-sm"><i class="fas fa-times"></i> Clear</a>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">Baseline</h5>
+                                <div class="prediction-string">{% if baseline_string %}{{ baseline_string }}{% else %}No predictions yet{% endif %}</div>
+                                <small class="text-muted">Higher probability wins</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">Profitable</h5>
+                                <div class="prediction-string">{% if profitable_string %}{{ profitable_string }}{% else %}No predictions yet{% endif %}</div>
+                                <small class="text-muted">Odds vs implied probability</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">Balanced</h5>
+                                <div class="prediction-string">{% if balanced_string %}{{ balanced_string }}{% else %}No predictions yet{% endif %}</div>
+                                <small class="text-muted">Combined probability + odds</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Match</th>
+                                <th>Date</th>
+                                <th>Country</th>
+                                <th>Game/League</th>
+                                <th>Baseline</th>
+                                <th>Profitable</th>
+                                <th>Balanced</th>
+                                <th>Actual</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for pred in predictions %}
+                            <tr>
+                                <td>{{ pred.match.team_a }} vs {{ pred.match.team_b }}</td>
+                                <td>{{ pred.match.date|date:"M d H:i" }}</td>
+                                <td>{{ pred.match.country|default:"-" }}</td>
+                                <td>{{ pred.match.game_title|default:"-" }}</td>
+                                <td><span class="badge bg-info">{{ pred.baseline }}</span></td>
+                                <td><span class="badge bg-success">{{ pred.profitable }}</span></td>
+                                <td><span class="badge bg-warning">{{ pred.balanced }}</span></td>
+                                <td>
+                                    {% if pred.match.actual_result %}
+                                        <span class="badge bg-{% if pred.match.actual_result == '1' %}success{% elif pred.match.actual_result == '3' %}danger{% else %}secondary{% endif %}">
+                                            {{ pred.match.actual_result }}
+                                        </span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="8" class="text-center text-muted">No predictions for this week{% if filter_week or filter_country or filter_game_title %} with the selected filters{% endif %}.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

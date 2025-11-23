@@ -1,0 +1,217 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card bg-primary text-white">
+            <div class="card-body text-center">
+                <h5>Baseline Accuracy</h5>
+                <h2 class="accuracy-badge">{{ baseline_accuracy }}%</h2>
+                <small>{{ baseline_wins }} / {{ total_predictions }} correct</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-success text-white">
+            <div class="card-body text-center">
+                <h5>Profitable Accuracy</h5>
+                <h2 class="accuracy-badge">{{ profitable_accuracy }}%</h2>
+                <small>{{ profitable_wins }} / {{ total_predictions }} correct</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-warning text-dark">
+            <div class="card-body text-center">
+                <h5>Balanced Accuracy</h5>
+                <h2 class="accuracy-badge">{{ balanced_accuracy }}%</h2>
+                <small>{{ balanced_wins }} / {{ total_predictions }} correct</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-chart-line"></i> Weekly Accuracy Trends</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="weeklyChart" height="100"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>Baseline Distribution</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="baselineDistChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>Profitable Distribution</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="profitableDistChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>Balanced Distribution</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="balancedDistChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-table"></i> Comparison Table</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-sm">
+                        <thead>
+                            <tr>
+                                <th>Match</th>
+                                <th>Actual</th>
+                                <th>Baseline</th>
+                                <th>Profitable</th>
+                                <th>Balanced</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for data in comparison_data %}
+                            <tr>
+                                <td>{{ data.match }}</td>
+                                <td><span class="badge bg-dark">{{ data.actual }}</span></td>
+                                <td>
+                                    <span class="badge bg-{% if data.baseline_correct %}success{% else %}danger{% endif %}">
+                                        {{ data.baseline }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-{% if data.profitable_correct %}success{% else %}danger{% endif %}">
+                                        {{ data.profitable }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-{% if data.balanced_correct %}success{% else %}danger{% endif %}">
+                                        {{ data.balanced }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center text-muted">No data available.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Weekly Accuracy Chart
+    const weeklyData = {{ weekly_data|safe }};
+    if (weeklyData.length > 0) {
+        const ctx = document.getElementById('weeklyChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: weeklyData.map(d => d.week),
+                datasets: [
+                    {
+                        label: 'Baseline',
+                        data: weeklyData.map(d => d.baseline),
+                        borderColor: 'rgb(13, 110, 253)',
+                        backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                        tension: 0.1
+                    },
+                    {
+                        label: 'Profitable',
+                        data: weeklyData.map(d => d.profitable),
+                        borderColor: 'rgb(25, 135, 84)',
+                        backgroundColor: 'rgba(25, 135, 84, 0.1)',
+                        tension: 0.1
+                    },
+                    {
+                        label: 'Balanced',
+                        data: weeklyData.map(d => d.balanced),
+                        borderColor: 'rgb(255, 193, 7)',
+                        backgroundColor: 'rgba(255, 193, 7, 0.1)',
+                        tension: 0.1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: {
+                            callback: function(value) {
+                                return value + '%';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Distribution Charts
+    const baselineDist = {{ baseline_dist|safe }};
+    const profitableDist = {{ profitable_dist|safe }};
+    const balancedDist = {{ balanced_dist|safe }};
+
+    function createDistChart(canvasId, data, color) {
+        const ctx = document.getElementById(canvasId).getContext('2d');
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Team A (1)', 'Team B (3)', 'Draw (0)'],
+                datasets: [{
+                    data: [data['1'], data['3'], data['0']],
+                    backgroundColor: [
+                        'rgba(54, 162, 235, 0.8)',
+                        'rgba(255, 99, 132, 0.8)',
+                        'rgba(255, 206, 86, 0.8)'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true
+            }
+        });
+    }
+
+    createDistChart('baselineDistChart', baselineDist);
+    createDistChart('profitableDistChart', profitableDist);
+    createDistChart('balancedDistChart', balancedDist);
+</script>
+{% endblock %}
+

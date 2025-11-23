@@ -1,0 +1,213 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3><i class="fas fa-{% if action == 'Create' %}plus{% else %}edit{% endif %}"></i> {{ title }}</h3>
+            </div>
+            <div class="card-body">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {{ form.non_field_errors }}
+                    </div>
+                    {% endif %}
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.team_a.id_for_label }}" class="form-label">
+                                    Team A (Home) <span class="text-danger">*</span>
+                                </label>
+                                {{ form.team_a }}
+                                {% if form.team_a.errors %}
+                                <div class="text-danger small">{{ form.team_a.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.team_b.id_for_label }}" class="form-label">
+                                    Team B (Away) <span class="text-danger">*</span>
+                                </label>
+                                {{ form.team_b }}
+                                {% if form.team_b.errors %}
+                                <div class="text-danger small">{{ form.team_b.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.date.id_for_label }}" class="form-label">
+                                    Match Date <span class="text-danger">*</span>
+                                </label>
+                                {{ form.date }}
+                                {% if form.date.errors %}
+                                <div class="text-danger small">{{ form.date.errors }}</div>
+                                {% endif %}
+                                <small class="form-text text-muted">Format: YYYY-MM-DDTHH:MM</small>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="{{ form.week_number.id_for_label }}" class="form-label">
+                                    Week Number
+                                </label>
+                                {{ form.week_number }}
+                                {% if form.week_number.errors %}
+                                <div class="text-danger small">{{ form.week_number.errors }}</div>
+                                {% endif %}
+                                {% if form.week_number.help_text %}
+                                <small class="form-text text-muted">{{ form.week_number.help_text }}</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="{{ form.actual_result.id_for_label }}" class="form-label">
+                                    Actual Result
+                                </label>
+                                {{ form.actual_result }}
+                                {% if form.actual_result.errors %}
+                                <div class="text-danger small">{{ form.actual_result.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    <h5>Probabilities</h5>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="{{ form.prob_a.id_for_label }}" class="form-label">
+                                    Team A Probability <span class="text-danger">*</span>
+                                </label>
+                                {{ form.prob_a }}
+                                {% if form.prob_a.errors %}
+                                <div class="text-danger small">{{ form.prob_a.errors }}</div>
+                                {% endif %}
+                                {% if form.prob_a.help_text %}
+                                <small class="form-text text-muted">{{ form.prob_a.help_text }}</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="{{ form.prob_b.id_for_label }}" class="form-label">
+                                    Team B Probability <span class="text-danger">*</span>
+                                </label>
+                                {{ form.prob_b }}
+                                {% if form.prob_b.errors %}
+                                <div class="text-danger small">{{ form.prob_b.errors }}</div>
+                                {% endif %}
+                                {% if form.prob_b.help_text %}
+                                <small class="form-text text-muted">{{ form.prob_b.help_text }}</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="{{ form.draw_prob.id_for_label }}" class="form-label">
+                                    Draw Probability
+                                </label>
+                                {{ form.draw_prob }}
+                                {% if form.draw_prob.errors %}
+                                <div class="text-danger small">{{ form.draw_prob.errors }}</div>
+                                {% endif %}
+                                {% if form.draw_prob.help_text %}
+                                <small class="form-text text-muted">{{ form.draw_prob.help_text }}</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    <h5>Odds</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.odds_a.id_for_label }}" class="form-label">
+                                    Team A Odds <span class="text-danger">*</span>
+                                </label>
+                                {{ form.odds_a }}
+                                {% if form.odds_a.errors %}
+                                <div class="text-danger small">{{ form.odds_a.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.odds_b.id_for_label }}" class="form-label">
+                                    Team B Odds <span class="text-danger">*</span>
+                                </label>
+                                {{ form.odds_b }}
+                                {% if form.odds_b.errors %}
+                                <div class="text-danger small">{{ form.odds_b.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    <h5>League Information</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.country.id_for_label }}" class="form-label">
+                                    Country
+                                </label>
+                                {{ form.country }}
+                                {% if form.country.errors %}
+                                <div class="text-danger small">{{ form.country.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.game_title.id_for_label }}" class="form-label">
+                                    Game/League Title
+                                </label>
+                                {{ form.game_title }}
+                                {% if form.game_title.errors %}
+                                <div class="text-danger small">{{ form.game_title.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> {{ action }} Match
+                        </button>
+                        {% if match %}
+                        <a href="{% url 'matches:match_detail' match.pk %}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                        {% else %}
+                        <a href="{% url 'matches:match_list' %}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="jumbotron bg-primary text-white p-5 rounded">
+            <h1 class="display-4"><i class="fas fa-futbol"></i> Sport Prediction System</h1>
+            <p class="lead">AI-powered sport match predictions using DeepSeek and rule-based algorithms</p>
+            <hr class="my-4 bg-white">
+            <p>Generate predictions using Baseline, Profitable, and Balanced strategies</p>
+            <a class="btn btn-light btn-lg" href="{% url 'matches:import_matches' %}" role="button">
+                <i class="fas fa-file-import"></i> Import Matches
+            </a>
+            <a class="btn btn-light btn-lg" href="{% url 'matches:match_list' %}" role="button">
+                <i class="fas fa-list"></i> View All Matches
+            </a>
+            <a class="btn btn-light btn-lg" href="{% url 'predictions:weekly_predictions' %}" role="button">
+                <i class="fas fa-calendar-week"></i> Weekly Predictions
+            </a>
+            <a class="btn btn-light btn-lg" href="{% url 'analytics:dashboard' %}" role="button">
+                <i class="fas fa-chart-bar"></i> Analytics
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5><i class="fas fa-clock"></i> Recent Matches</h5>
+            </div>
+            <div class="card-body">
+                {% if recent_matches %}
+                    <ul class="list-group list-group-flush">
+                        {% for match in recent_matches %}
+                        <li class="list-group-item">
+                            <strong>{{ match.team_a }}</strong> vs <strong>{{ match.team_b }}</strong><br>
+                            <small class="text-muted">{{ match.date|date:"M d, Y" }}</small>
+                            <a href="{% url 'matches:match_detail' match.pk %}" class="btn btn-sm btn-primary float-end">
+                                View
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-muted">No matches yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5><i class="fas fa-chart-line"></i> Matches with Predictions</h5>
+            </div>
+            <div class="card-body">
+                {% if matches_with_predictions %}
+                    <ul class="list-group list-group-flush">
+                        {% for match in matches_with_predictions %}
+                        <li class="list-group-item">
+                            <strong>{{ match.team_a }}</strong> vs <strong>{{ match.team_b }}</strong><br>
+                            {% with prediction=match.predictions.first %}
+                            <small>
+                                B:{{ prediction.baseline }} 
+                                P:{{ prediction.profitable }} 
+                                BL:{{ prediction.balanced }}
+                            </small>
+                            {% endwith %}
+                            <a href="{% url 'matches:match_detail' match.pk %}" class="btn btn-sm btn-success float-end">
+                                View
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-muted">No predictions yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-warning text-dark">
+                <h5><i class="fas fa-calendar"></i> Upcoming This Week</h5>
+            </div>
+            <div class="card-body">
+                {% if upcoming_matches %}
+                    <ul class="list-group list-group-flush">
+                        {% for match in upcoming_matches %}
+                        <li class="list-group-item">
+                            <strong>{{ match.team_a }}</strong> vs <strong>{{ match.team_b }}</strong><br>
+                            <small class="text-muted">{{ match.date|date:"M d, H:i" }}</small>
+                            <a href="{% url 'matches:match_detail' match.pk %}" class="btn btn-sm btn-warning float-end">
+                                Predict
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-muted">No upcoming matches.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-info-circle"></i> Quick Start Guide</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <h6><i class="fas fa-plus-circle text-primary"></i> 1. Add Matches</h6>
+                        <p>Go to Admin panel to add matches with probabilities and odds</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h6><i class="fas fa-magic text-success"></i> 2. Generate Predictions</h6>
+                        <p>Use rule-based or AI-powered prediction generation</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h6><i class="fas fa-chart-bar text-warning"></i> 3. View Analytics</h6>
+                        <p>Track accuracy and compare different prediction strategies</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

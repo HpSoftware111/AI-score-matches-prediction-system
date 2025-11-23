@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h3><i class="fas fa-file-import"></i> Import Matches from Text</h3>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <h5><i class="fas fa-info-circle"></i> How to use:</h5>
+                    <ol>
+                        <li>Paste your match data in the text area below</li>
+                        <li>The format should include:
+                            <ul>
+                                <li>Date and time (e.g., "Nov 29, 10:00 AM ET")</li>
+                                <li>Team names</li>
+                                <li>Probabilities as percentages (e.g., "15%")</li>
+                                <li>Odds in American format (e.g., "+600", "-190")</li>
+                            </ul>
+                        </li>
+                        <li>Click "Import Matches" to process</li>
+                    </ol>
+                    <p class="mb-0"><strong>Example format:</strong></p>
+                    <pre class="bg-light p-2 mt-2" style="font-size: 0.9em;">
+Nov 29, 10:00 AM ET
+Burnley
+Burnley
+15%
+FanDuel
++600
+Brentford
+Brentford
+64%
+BetMGM
+-190
+EPL</pre>
+                </div>
+                
+                <form method="post" class="mt-4">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="text_data" class="form-label"><strong>Paste Match Data:</strong></label>
+                        <textarea 
+                            name="text_data" 
+                            id="text_data" 
+                            class="form-control" 
+                            rows="20" 
+                            placeholder="Paste your match data here..."
+                            style="font-family: monospace; font-size: 0.9em;"
+                            required
+                        ></textarea>
+                        <small class="form-text text-muted">Paste the text containing match information, dates, teams, probabilities, and odds.</small>
+                    </div>
+                    
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-file-import"></i> Import Matches
+                        </button>
+                        <a href="{% url 'matches:match_list' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to Matches
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5><i class="fas fa-lightbulb"></i> Tips</h5>
+            </div>
+            <div class="card-body">
+                <ul class="mb-0">
+                    <li>Duplicate matches (same teams and date) will be skipped automatically</li>
+                    <li>Teams will be created automatically if they don't exist</li>
+                    <li>Draw probability is calculated automatically (100% - Team A% - Team B%)</li>
+                    <li>American odds (+600, -190) are automatically converted to decimal format</li>
+                    <li>You'll see success messages and any errors after importing</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
