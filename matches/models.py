@@ -76,8 +76,8 @@ class Match(models.Model):
         max_length=1,
         blank=True,
         null=True,
-        choices=[('1', 'Team A Win'), ('3', 'Team B Win'), ('0', 'Draw')],
-        help_text="Actual match result: 1=Team A, 3=Team B, 0=Draw",
+        choices=[('3', 'Team A Win'), ('1', 'Draw'), ('0', 'Team B Win')],
+        help_text="Actual match result: 3=Team A, 1=Draw, 0=Team B",
         verbose_name="Actual Result"
     )
     created_at = models.DateTimeField(auto_now_add=True)

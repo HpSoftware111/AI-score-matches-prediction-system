@@ -18,16 +18,16 @@ class PredictionEngine:
     def calculate_baseline_prediction(self, match):
         """
         Baseline Prediction:
-        Rule: Higher probability → 1 (Team A), 3 (Team B), close → 0
+        Rule: Higher probability → 3 (Team A), 0 (Team B), close → 1 (Draw)
         """
         prob_diff = abs(match.prob_a - match.prob_b)
         
         if prob_diff <= self.threshold:
-            return '0'  # Close match → draw
+            return '1'  # Close match → draw
         elif match.prob_a > match.prob_b:
-            return '1'  # Team A higher
+            return '3'  # Team A higher
         else:
-            return '3'  # Team B higher
+            return '0'  # Team B higher
     
     def calculate_profitable_prediction(self, match):
         """
@@ -44,11 +44,11 @@ class PredictionEngine:
         value_threshold = 0.10  # 10% minimum value
         
         if value_a >= value_threshold and value_a > value_b:
-            return '1'  # Team A undervalued
+            return '3'  # Team A undervalued
         elif value_b >= value_threshold and value_b > value_a:
-            return '3'  # Team B undervalued
+            return '0'  # Team B undervalued
         else:
-            return '0'  # No clear value
+            return '1'  # No clear value
     
     def calculate_balanced_prediction(self, match):
         """
@@ -74,11 +74,11 @@ class PredictionEngine:
             team_b_score += 1
         
         if team_a_score >= 2 and team_a_score > team_b_score:
-            return '1'  # Team A clearly aligned
+            return '3'  # Team A clearly aligned
         elif team_b_score >= 2 and team_b_score > team_a_score:
-            return '3'  # Team B clearly aligned
+            return '0'  # Team B clearly aligned
         else:
-            return '0'  # Not clearly aligned
+            return '1'  # Not clearly aligned
     
     def generate_prediction(self, match, use_ai=False):
         """

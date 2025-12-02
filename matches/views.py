@@ -3,12 +3,14 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.views.decorators.http import require_http_methods
 from django.db.models import Q
+from django.http import JsonResponse
 from .models import Match, Team
 from .forms import MatchForm
 from predictions.models import Prediction
 from .text_parser import import_matches_from_text
 from django.utils import timezone
 from datetime import timedelta
+import json
 
 
 def home(request):
@@ -63,6 +65,18 @@ def import_matches(request):
         text_data = request.POST.get('text_data', '')
         if text_data:
             created, errors, warnings = import_matches_from_text(text_data, skip_duplicates=True)
+            
+            # Check if this is an AJAX request
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'success': True,
+                    'created': created,
+                    'errors': errors[:50],  # Limit to 50 errors for display
+                    'warnings': warnings[:50],  # Limit to 50 warnings for display
+                    'message': f"Successfully imported {created} matches." if created > 0 else "No matches were imported."
+                })
+            
+            # Regular form submission
             if created > 0:
                 messages.success(request, f"Successfully imported {created} matches.")
             if warnings:

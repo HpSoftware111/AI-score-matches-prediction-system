@@ -70,9 +70,21 @@
                 </div>
                 {% endif %}
                 
+                {% if api_responses %}
+                <hr>
+                <h5>DeepSeek API Data Available</h5>
+                <p class="text-muted">Full API response data has been stored for this prediction.</p>
+                <a href="{% url 'predictions:prediction_analysis' match.pk %}" class="btn btn-info">
+                    <i class="fas fa-chart-line"></i> View Detailed Analysis
+                </a>
+                {% endif %}
+
                 <div class="mt-3">
                     <a href="{% url 'matches:match_detail' match.pk %}" class="btn btn-primary">
                         <i class="fas fa-arrow-left"></i> Back to Match
+                    </a>
+                    <a href="{% url 'predictions:prediction_analysis' match.pk %}" class="btn btn-info">
+                        <i class="fas fa-chart-line"></i> View Analysis
                     </a>
                     <a href="{% url 'analytics:dashboard' %}" class="btn btn-secondary">
                         <i class="fas fa-chart-bar"></i> View Analytics

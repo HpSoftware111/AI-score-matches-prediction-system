@@ -1,0 +1,204 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h3><i class="fas fa-chart-line"></i> {{ title }}</h3>
+                <a href="{% url 'predictions:prediction_analysis' match.pk %}?refresh=true" class="btn btn-sm btn-primary">
+                    <i class="fas fa-sync"></i> Refresh Analysis
+                </a>
+            </div>
+            <div class="card-body">
+                <!-- Match Information -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h5>Match Details</h5>
+                        <table class="table table-sm">
+                            <tr>
+                                <th>Teams:</th>
+                                <td><strong>{{ match.team_a }}</strong> vs <strong>{{ match.team_b }}</strong></td>
+                            </tr>
+                            <tr>
+                                <th>Date:</th>
+                                <td>{{ match.date|date:"Y-m-d H:i" }}</td>
+                            </tr>
+                            <tr>
+                                <th>Probabilities:</th>
+                                <td>{{ match.team_a }} {{ match.prob_a_percent }}%, {{ match.team_b }} {{ match.prob_b_percent }}%, Draw {{ match.draw_prob_percent }}%</td>
+                            </tr>
+                            <tr>
+                                <th>Odds:</th>
+                                <td>{{ match.team_a }} {{ match.odds_a }}, {{ match.team_b }} {{ match.odds_b }}</td>
+                            </tr>
+                            {% if match.actual_result %}
+                            <tr>
+                                <th>Result:</th>
+                                <td>
+                                    <span class="badge bg-{% if match.actual_result == '3' %}success{% elif match.actual_result == '0' %}danger{% else %}warning{% endif %}">
+                                        {% if match.actual_result == '3' %}{{ match.team_a }} Win
+                                        {% elif match.actual_result == '0' %}{{ match.team_b }} Win
+                                        {% else %}Draw{% endif %}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endif %}
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>Predictions</h5>
+                        {% if prediction %}
+                        <div class="row">
+                            <div class="col-4">
+                                <div class="card bg-info text-white text-center mb-2">
+                                    <div class="card-body p-2">
+                                        <small>Baseline</small>
+                                        <h4>{{ prediction.baseline }}</h4>
+                                        {% if prediction.ai_baseline %}
+                                        <small>AI: {{ prediction.ai_baseline }}</small>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="card bg-success text-white text-center mb-2">
+                                    <div class="card-body p-2">
+                                        <small>Profitable</small>
+                                        <h4>{{ prediction.profitable }}</h4>
+                                        {% if prediction.ai_profitable %}
+                                        <small>AI: {{ prediction.ai_profitable }}</small>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="card bg-warning text-dark text-center mb-2">
+                                    <div class="card-body p-2">
+                                        <small>Balanced</small>
+                                        <h4>{{ prediction.balanced }}</h4>
+                                        {% if prediction.ai_balanced %}
+                                        <small>AI: {{ prediction.ai_balanced }}</small>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% if prediction.is_correct is not None %}
+                        <div class="mt-2">
+                            <span class="badge bg-{% if prediction.is_correct %}success{% else %}danger{% endif %}">
+                                {% if prediction.is_correct %}✓ Correct{% else %}✗ Incorrect{% endif %}
+                            </span>
+                            <small class="text-muted">({{ prediction.prediction_type_used }})</small>
+                        </div>
+                        {% endif %}
+                        {% else %}
+                        <p class="text-muted">No predictions generated yet.</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- API Response Analysis -->
+                {% if analysis_data %}
+                <hr>
+                <h5>DeepSeek API Analysis</h5>
+                <div class="row">
+                    {% for pred_type, data in analysis_data.items %}
+                    <div class="col-md-4 mb-3">
+                        <div class="card">
+                            <div class="card-header">
+                                <strong>{{ pred_type|title }} Prediction</strong>
+                            </div>
+                            <div class="card-body">
+                                <table class="table table-sm table-bordered">
+                                    <tr>
+                                        <th>Model:</th>
+                                        <td>{{ data.model }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Total Tokens:</th>
+                                        <td>{{ data.tokens_used }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Prompt Tokens:</th>
+                                        <td>{{ data.prompt_tokens }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Completion Tokens:</th>
+                                        <td>{{ data.completion_tokens }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Cache Hit:</th>
+                                        <td>{{ data.cache_hit_tokens }} tokens</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Cache Miss:</th>
+                                        <td>{{ data.cache_miss_tokens }} tokens</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Response:</th>
+                                        <td><strong>{{ data.raw_content }}</strong></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- Full API Response (Collapsible) -->
+                {% if api_responses %}
+                <hr>
+                <h5>Full API Response Data</h5>
+                <div class="accordion" id="apiResponseAccordion">
+                    {% for pred_type, response in api_responses.items %}
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="heading{{ pred_type }}">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ pred_type }}">
+                                {{ pred_type|title }} - Full Response
+                            </button>
+                        </h2>
+                        <div id="collapse{{ pred_type }}" class="accordion-collapse collapse" data-bs-parent="#apiResponseAccordion">
+                            <div class="accordion-body">
+                                <pre class="bg-light p-3" style="max-height: 400px; overflow-y: auto;"><code id="json-{{ pred_type }}">Loading...</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <div class="mt-4">
+                    <a href="{% url 'matches:match_detail' match.pk %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to Match
+                    </a>
+                    <a href="{% url 'predictions:accuracy_stats' %}" class="btn btn-info">
+                        <i class="fas fa-chart-bar"></i> View Accuracy Stats
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Format JSON responses for display
+{% if api_responses_json %}
+document.addEventListener('DOMContentLoaded', function() {
+    {% for pred_type, response_json in api_responses_json.items %}
+    const jsonElement{{ forloop.counter }} = document.getElementById('json-{{ pred_type }}');
+    if (jsonElement{{ forloop.counter }}) {
+        try {
+            const responseData = JSON.parse('{{ response_json|escapejs }}');
+            jsonElement{{ forloop.counter }}.textContent = JSON.stringify(responseData, null, 2);
+        } catch(e) {
+            jsonElement{{ forloop.counter }}.textContent = 'Error formatting JSON: ' + e.message + '\n\nRaw: {{ response_json|escapejs }}';
+        }
+    }
+    {% endfor %}
+});
+{% endif %}
+</script>
+{% endblock %}
+

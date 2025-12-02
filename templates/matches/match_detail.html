@@ -51,9 +51,9 @@
                     <dt class="col-sm-4">Actual Result:</dt>
                     <dd class="col-sm-8">
                         {% if match.actual_result %}
-                            <span class="badge bg-{% if match.actual_result == '1' %}success{% elif match.actual_result == '3' %}danger{% else %}warning{% endif %}">
-                                {% if match.actual_result == '1' %}{{ match.team_a }} Win
-                                {% elif match.actual_result == '3' %}{{ match.team_b }} Win
+                            <span class="badge bg-{% if match.actual_result == '3' %}success{% elif match.actual_result == '0' %}danger{% else %}warning{% endif %}">
+                                {% if match.actual_result == '3' %}{{ match.team_a }} Win
+                                {% elif match.actual_result == '0' %}{{ match.team_b }} Win
                                 {% else %}Draw{% endif %}
                             </span>
                         {% else %}
@@ -88,6 +88,11 @@
                 <a href="{% url 'predictions:generate_predictions' match.pk %}?use_ai=true" class="btn btn-primary w-100 mb-2">
                     <i class="fas fa-robot"></i> Generate with AI
                 </a>
+                {% if match.predictions.exists %}
+                <a href="{% url 'predictions:prediction_analysis' match.pk %}" class="btn btn-info w-100 mb-2">
+                    <i class="fas fa-chart-line"></i> View Detailed Analysis
+                </a>
+                {% endif %}
                 {% endif %}
                 <a href="{% url 'matches:match_list' %}" class="btn btn-secondary w-100">
                     <i class="fas fa-arrow-left"></i> Back to Matches
@@ -104,13 +109,31 @@
                 {% with prediction=match.predictions.first %}
                 <p><strong>Baseline:</strong> 
                     <span class="badge bg-info">{{ prediction.baseline }}</span>
+                    {% if prediction.ai_baseline %}
+                    <small class="text-muted">(AI: {{ prediction.ai_baseline }})</small>
+                    {% endif %}
                 </p>
                 <p><strong>Profitable:</strong> 
                     <span class="badge bg-success">{{ prediction.profitable }}</span>
+                    {% if prediction.ai_profitable %}
+                    <small class="text-muted">(AI: {{ prediction.ai_profitable }})</small>
+                    {% endif %}
                 </p>
                 <p><strong>Balanced:</strong> 
                     <span class="badge bg-warning">{{ prediction.balanced }}</span>
+                    {% if prediction.ai_balanced %}
+                    <small class="text-muted">(AI: {{ prediction.ai_balanced }})</small>
+                    {% endif %}
                 </p>
+                {% if prediction.is_correct is not None %}
+                <hr>
+                <p><strong>Accuracy:</strong> 
+                    <span class="badge bg-{% if prediction.is_correct %}success{% else %}danger{% endif %}">
+                        {% if prediction.is_correct %}✓ Correct{% else %}✗ Incorrect{% endif %}
+                    </span>
+                    <small class="text-muted">({{ prediction.prediction_type_used }})</small>
+                </p>
+                {% endif %}
                 {% endwith %}
             </div>
         </div>

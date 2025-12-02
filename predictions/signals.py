@@ -21,3 +21,13 @@ def auto_generate_predictions(sender, instance, created, **kwargs):
             predictions = engine.generate_prediction(instance, use_ai=False)
             Prediction.objects.create(match=instance, **predictions)
 
+
+@receiver(post_save, sender=Match)
+def update_prediction_accuracy(sender, instance, **kwargs):
+    """
+    Update prediction accuracy when match result is set or updated
+    """
+    if instance.actual_result:
+        predictions = Prediction.objects.filter(match=instance)
+        for pred in predictions:
+            pred.update_accuracy()
